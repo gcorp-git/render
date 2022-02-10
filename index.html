@@ -1,0 +1,29 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+	<meta charset="UTF-8">
+	<meta name="viewport" content="width=device-width, initial-scale=1.0">
+	<title>Render</title>
+</head>
+<body>
+	<div id="app">
+		<p>Lorem ipsum dolor sit amet consectetur adipisicing elit. Qui quisquam sunt necessitatibus, esse adipisci. Voluptatum iusto, debitis quibusdam sit et quaerat mollitia maiores, est consectetur adipisci, quis vel, odit nisi.</p>
+		<a
+			href="/test"
+			@click.prevent="this.test($event, 123)"
+			@mousedown="this.md(777)"
+			:style="this.style"
+		>
+			<div>test</div>
+		</a>
+		<p>This text is mutable: ${this.lorem}</p>
+		<p>Lorem ipsum dolor, sit amet, consectetur adipisicing elit. Officiis corporis optio voluptatem itaque saepe. Totam provident, veritatis numquam consequuntur autem nihil, voluptate, voluptas at nam maxime omnis sint? Minima, rerum?</p>
+	</div>
+
+	<script src="/render-html-element.js"></script>
+	<script src="/render-text.js"></script>
+	<script src="/render-instance.js"></script>
+	<script src="/render.js"></script>
+	<script src="/script.js"></script>
+</body>
+</html>
