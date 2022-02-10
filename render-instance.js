@@ -17,8 +17,8 @@
 			this.map = new WeakMap();
 			this.map.set( this.$node, this.dom );
 
-			this.isChanged = true;
 			this.isDestroyed = false;
+			this.isChanged = true;
 
 			for ( const $child of this.$node.childNodes ) {
 				_spy( $child, this );
@@ -31,23 +31,24 @@
 				subtree: true,
 			});
 
-			const step = delta => {
-				if ( this.isDestroyed ) return;
+			_detectChanges( this );
 
-				if ( this.isChanged ) {
-					this.isChanged = false;
-					this.dom.render();
-				}
-
-				window.requestAnimationFrame( step );
-			};
-
-			window.requestAnimationFrame( step );
+			if ( typeof this.declaration?.hooks?.created === 'function' ) {
+				this.declaration.hooks.created.call( this.app, this.$node );
+			}
 		}
 		destructor() {
 			this.isDestroyed = true;
 
+			if ( typeof this.declaration?.hooks?.destroyed === 'function' ) {
+				this.declaration.hooks.destroyed.call( this.app );
+			}
+
 			this.observer.disconnect();
+
+			for ( const $child of this.$node.childNodes ) {
+				_unspy( $child, this );
+			}
 		}
 	};
 
@@ -70,8 +71,15 @@
 			},
 			set: ( target, name, value ) => {
 				if ( target.props[ name ] !== value ) {
+					const previous = target.props[ name ];
+					const current = value;
+
 					target.props[ name ] = value;
 					instance.isChanged = true;
+
+					if ( typeof instance.declaration?.hooks?.changed === 'function' ) {
+						instance.declaration.hooks.changed.call( instance.app, name, { previous, current } );
+					}
 				}
 
 				return true;
@@ -156,6 +164,21 @@
 				instance.map.delete( $node, o );
 			} break;
 		}
+	}
+
+	function _detectChanges( instance ) {
+		const step = delta => {
+			if ( instance.isDestroyed ) return;
+
+			if ( instance.isChanged ) {
+				instance.isChanged = false;
+				instance.dom.render();
+			}
+
+			window.requestAnimationFrame( step );
+		};
+
+		window.requestAnimationFrame( step );
 	}
 
 })();

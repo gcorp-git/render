@@ -21,39 +21,19 @@
 		}
 		destructor() {
 			for ( const name in this.attrs.events ) {
-				_removeEventListener( this.$node, this.instance, name );
+				_removeEventListener( this, this.$node, this.instance, name );
 			}
 
 			this.attrs.events = {};
 		}
 		render() {
-			let changes = {};
-			let hasChanges = false;
-
 			for ( const name in this.attrs.props ) {
 				const prop = this.attrs.props[ name ];
 				const value = prop.handler();
 
 				if ( prop.value !== value ) {
-					changes[ name ] = {
-						previous: prop.value,
-						current: value,
-					};
-
 					prop.value = value;
-					hasChanges = true;
-				}
-			}
-
-			if ( hasChanges ) {
-				changes = _deepFreeze({ ...changes });
-
-				for ( const name in changes ) {
-					_applyProperty( this.$node, name, changes[ name ].current );
-				}
-
-				if ( this.instance.declaration?.hooks?.change ) {
-					this.instance.declaration.hooks.change.call( this.instance.app, changes );
+					_applyProperty( this.$node, name, value );
 				}
 			}
 
@@ -233,24 +213,6 @@
 				throw 'incorrect :style value';
 			} break;
 		}
-	}
-
-	function _deepFreeze( o ) {
-		Object.freeze( o );
-
-		if ( o === undefined ) return o;
-
-		Object.getOwnPropertyNames( o ).forEach( prop => {
-			if (
-				o[ prop ] !== null
-				&& ( typeof o[ prop ] === 'object' || typeof o[ prop ] === 'function' )
-				&& !Object.isFrozen( o[ prop ] )
-			) {
-				_deepFreeze( o[ prop ] );
-			}
-		});
-
-		return o;
 	}
 
 })();
