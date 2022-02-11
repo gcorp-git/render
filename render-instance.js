@@ -119,7 +119,7 @@
 	function _spy( $node, instance ) {
 		switch ( true ) {
 			case $node instanceof HTMLElement: {
-				const parent = instance.map.get( $node.parentNode );
+				const parent = instance.map.get( $node.parentElement );
 				const o = new RenderHTMLElement( $node, instance );
 
 				parent.children.add( o );
@@ -130,10 +130,11 @@
 				}
 			} break;
 			case $node instanceof Text: {
-				const parent = instance.map.get( $node.parentNode );
+				const parent = instance.map.get( $node.parentElement );
 				const o = new RenderText( $node, instance );
 
-				parent.children.add( o );
+				if ( parent ) parent.children.add( o );
+
 				instance.map.set( $node, o );
 			} break;
 		}
@@ -142,8 +143,10 @@
 	function _unspy( $node, instance ) {
 		switch ( true ) {
 			case $node instanceof HTMLElement: {
-				const parent = instance.map.get( $node.parentNode );
+				const parent = instance.map.get( $node.parentElement );
 				const o = instance.map.get( $node );
+
+				if ( !o ) return;
 
 				for ( const child of o.children ) {
 					_unspy( child.$node, instance );
@@ -155,12 +158,15 @@
 				instance.map.delete( $node, o );
 			} break;
 			case $node instanceof Text: {
-				const parent = instance.map.get( $node.parentNode );
+				const parent = instance.map.get( $node.parentElement );
 				const o = instance.map.get( $node );
+
+				if ( !o ) return;
 
 				o.destructor();
 
-				parent.children.delete( o );
+				if ( parent ) parent.children.delete( o );
+				
 				instance.map.delete( $node, o );
 			} break;
 		}

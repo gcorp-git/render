@@ -60,8 +60,6 @@
 		for ( const name in attrs ) {
 			const value = attrs[ name ];
 
-			$node.removeAttribute( name );
-
 			switch ( true ) {
 				case name.indexOf( '@' ) === 0: {
 					const splitted = name.split( '.' );

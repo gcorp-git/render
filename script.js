@@ -8,7 +8,7 @@
 			lorem: 'Lorem ipsum dolor sit amet, consectetur, adipisicing elit.',
 		},
 		hooks: {
-			created: $node => {
+			created( $node ) {
 				console.log( 'created' );
 
 				const html = `
@@ -21,10 +21,10 @@
 
 				console.log( 'inserted', inserted );
 			},
-			changed: ( name, value ) => {
+			changed( name, value ) {
 				console.log( 'changed', name, value );
 			},
-			destroyed: () => {
+			destroyed() {
 				console.log( 'destroyed' );
 			},
 		},
