@@ -13,10 +13,14 @@
 			this.instance = instance;
 			this.children = new Set();
 			this.listeners = [];
-			this.attrs = _processAttributes( this.$node, this.instance );
+			this.attrs = { props: {}, events: {} };
 
-			for ( const name in this.attrs.events ) {
-				_addEventListener( this, name );
+			if ( this.$node !== instance.$node ) {
+				this.attrs = _processAttributes( this.$node, this.instance );
+
+				for ( const name in this.attrs.events ) {
+					_addEventListener( this, name );
+				}
 			}
 		}
 		destructor() {
@@ -100,7 +104,19 @@
 		const options = {};
 		const f = new Function( '$event', `return ${value}` );
 
-		let handler = e => f.call( instance.app, e instanceof CustomEvent ? e.detail : e );
+		let handler = e => {
+			if ( e instanceof CustomEvent ) {
+				f.call( instance.app, e.detail );
+			} else {
+				for ( const $node of e.path ) {
+					if ( !( $node instanceof HTMLElement ) ) continue;
+					if ( $node.tagName.indexOf('APP-') !== 0 ) continue;
+					if ( $node === instance.$node ) { break; } else { return; }
+				}
+
+				f.call( instance.app, e );
+			}
+		};
 		
 		for ( const modifier of modifiers ) {
 			switch ( modifier ) {

@@ -1,12 +1,13 @@
 ;(function(){
 	'use strict';
 
-	window.app = Render.attach({
-		selector: '#app',
-		props: {
+	const $app = document.querySelector( '#app' );
+
+	Render.app( 'test', {
+		props: () => ({
 			style: { color: 'red' },
 			lorem: 'Lorem ipsum dolor sit amet, consectetur, adipisicing elit.',
-		},
+		}),
 		hooks: {
 			created( $node ) {
 				console.log( 'created' );
@@ -36,9 +37,26 @@
 				console.log( 'method:md', m );
 			},
 			destroy() {
-				Render.detach( window.app );
+				$app.innerHTML = '';
 			},
 		},
 	});
+
+	$app.innerHTML = `
+		<app-test>
+			<p>Lorem ipsum dolor sit amet consectetur adipisicing elit.</p>
+			<a
+				href="/"
+				@click.prevent="this.test($event, 'click-argument')"
+				@mousedown="this.md('mousedown-argument')"
+				:style="this.style"
+			>
+				<div>test</div>
+			</a>
+			<p>This text is mutable: \${this.lorem}</p>
+			<p>Officiis corporis optio voluptatem itaque saepe.</p>
+			<div :style="this.style" @click.prevent="this.destroy()">destroy</div>
+		</app-test>
+	`;
 
 })();

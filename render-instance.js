@@ -2,14 +2,24 @@
 	'use strict';
 
 	class RenderInstance {
-		constructor( args ) {
-			this.$node = document.querySelector( args.selector );
+		constructor( name, $node, declaration ) {
+			if ( !( $node instanceof HTMLElement ) ) {
+				$node = document.querySelector( $node );
 
-			if ( !( this.$node instanceof HTMLElement ) ) {
-				throw 'incorrect selector';
+				if ( !( $node instanceof HTMLElement ) ) {
+					throw 'incorrect selector';
+				}
 			}
 
-			this.declaration = { ...args };
+			this.name = name;
+			this.$node = $node;
+
+			this.declaration = { ...declaration, props: declaration.props() };
+			
+			if ( !( this.declaration.props instanceof Object ) ) {
+				throw `render app '${this.name}': incorrect declaration`;
+			}
+
 			this.app = _createAppProxy( this.declaration, this );
 
 			this.dom = new RenderHTMLElement( this.$node, this );
@@ -59,6 +69,8 @@
 
 		proxy = new Proxy( declaration, {
 			get: ( target, name ) => {
+				if ( name === '$event' ) return _dispatch.bind( instance );
+
 				if ( typeof target.methods[ name ] === 'function' ) {
 					return target.methods[ name ].bind( proxy );
 				}
@@ -77,8 +89,8 @@
 					target.props[ name ] = value;
 					instance.isChanged = true;
 
-					if ( typeof instance.declaration?.hooks?.changed === 'function' ) {
-						instance.declaration.hooks.changed.call( instance.app, name, { previous, current } );
+					if ( typeof target?.hooks?.changed === 'function' ) {
+						target.hooks.changed.call( instance.app, name, { previous, current } );
 					}
 				}
 
@@ -87,6 +99,13 @@
 		});
 
 		return proxy;
+	}
+
+	function _dispatch( name, detail ) {
+		const options = { detail, bubbles: true };
+		const event = new CustomEvent( name, options );
+		
+		this.$node.dispatchEvent( event );
 	}
 
 	function _createObserver( instance ) {
@@ -122,7 +141,8 @@
 				const parent = instance.map.get( $node.parentElement );
 				const o = new RenderHTMLElement( $node, instance );
 
-				parent.children.add( o );
+				if ( parent ) parent.children.add( o );
+				
 				instance.map.set( $node, o );
 
 				for ( const $child of $node.childNodes ) {
@@ -154,7 +174,8 @@
 
 				o.destructor();
 
-				parent.children.delete( o );
+				if ( parent ) parent.children.delete( o );
+				
 				instance.map.delete( $node, o );
 			} break;
 			case $node instanceof Text: {
@@ -166,7 +187,7 @@
 				o.destructor();
 
 				if ( parent ) parent.children.delete( o );
-				
+
 				instance.map.delete( $node, o );
 			} break;
 		}
