@@ -106,7 +106,7 @@
 			throw `render app '${name}' has not been registered yet`;
 		}
 
-		const instance = new RenderInstance( name, $node, STATE.apps[ name ] );
+		const instance = new RenderApp( name, $node, STATE.apps[ name ] );
 	}
 
 	function _detach( $node ) {

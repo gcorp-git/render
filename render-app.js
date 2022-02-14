@@ -1,7 +1,7 @@
 ;(function(){
 	'use strict';
 
-	class RenderInstance {
+	class RenderApp {
 		constructor( name, $node, declaration ) {
 			if ( !( $node instanceof HTMLElement ) ) {
 				$node = document.querySelector( $node );
@@ -62,7 +62,7 @@
 		}
 	};
 
-	window.RenderInstance = RenderInstance;
+	window.RenderApp = RenderApp;
 
 	function _createAppProxy( declaration, instance ) {
 		let proxy = undefined;
@@ -101,13 +101,6 @@
 		return proxy;
 	}
 
-	function _dispatch( name, detail ) {
-		const options = { detail, bubbles: true };
-		const event = new CustomEvent( name, options );
-		
-		this.$node.dispatchEvent( event );
-	}
-
 	function _createObserver( instance ) {
 		return new MutationObserver(( mutations, observer ) => {
 			let needsRender = false;
@@ -135,7 +128,23 @@
 		});
 	}
 
+	function _getParentAppNode( $node, instance ) {
+		let $parent = $node.parentElement;
+		
+		while ( $parent ) {
+			if ( $parent.tagName.indexOf('APP-') === 0 ) return $parent;
+
+			$parent = $parent.parentElement;
+		}
+
+		return null;
+	}
+
 	function _spy( $node, instance ) {
+		if ( $node !== instance.$node ) {
+			if ( _getParentAppNode( $node, instance ) !== instance.$node ) return;
+		}
+
 		switch ( true ) {
 			case $node instanceof HTMLElement: {
 				const parent = instance.map.get( $node.parentElement );
@@ -206,6 +215,13 @@
 		};
 
 		window.requestAnimationFrame( step );
+	}
+
+	function _dispatch( name, detail ) {
+		const options = { detail, bubbles: true };
+		const event = new CustomEvent( name, options );
+		
+		this.$node.dispatchEvent( event );
 	}
 
 })();

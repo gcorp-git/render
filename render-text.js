@@ -19,7 +19,9 @@
 			}
 		}
 		destructor() {
-			//
+			if ( this.isMutable ) {
+				this.$node.textContent = this.tpl;
+			}
 		}
 		render() {
 			if ( !this.isMutable ) return;
