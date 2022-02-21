@@ -110,7 +110,7 @@
 			} else {
 				for ( const $node of e.path ) {
 					if ( !( $node instanceof HTMLElement ) ) continue;
-					if ( $node.tagName.indexOf('APP-') !== 0 ) continue;
+					if ( $node.tagName.indexOf( 'APP-' ) !== 0 ) continue;
 					if ( $node === instance.$node ) { break; } else { return; }
 				}
 
