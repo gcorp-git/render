@@ -18,9 +18,7 @@
 					<p>333</p>
 				`;
 
-				const inserted = Render.insert( html, 'afterbegin', $node );
-
-				console.log( 'inserted', inserted );
+				$node.innerHTML = html + $node.innerHTML;
 			},
 			changed( name, value ) {
 				console.log( 'changed', name, value );
